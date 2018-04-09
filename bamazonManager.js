@@ -1,7 +1,7 @@
 //NPM inquirer package for prompts
 var inquirer = require("inquirer");
 
-//NPM MySQL package to link MySQL & NODE
+//NPM MySQL package to link MySQL & NODE (??????DO I HAVE TO DO THIS FOR EACH FILE?????)
 var mysql      = require('mysql');
 var connection = mysql.createConnection({
   host     : 'localhost',
@@ -9,6 +9,8 @@ var connection = mysql.createConnection({
   password : '#', //put in password, but will hide in .env
   database : 'bamazon'
 });
+
+
 
 connection.connect(function(err) {
     if (err) {
@@ -23,7 +25,7 @@ connection.connect(function(err) {
 //list a set of menu options : VIEW PRODUCTS FOR SALE, LOW INVENTORY, ADD TO INVENTORY, ADD NEW PRODUCT
 
 //display all of the items available for sale. Include the ids, names, and prices of products for sale.
-function afterConnection(){
+function menuOptions(){
  connection.query("SELECT * FROM products", function (err, results){
     if (err)throw err;
     for (var i = 0; i < results.length; i++){

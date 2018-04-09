@@ -1,47 +1,63 @@
 //NPM inquirer package for prompts
 var inquirer = require("inquirer");
 
-//NPM MySQL package to link MySQL & NODE
-var mysql      = require('mysql');
+//NPM MySQL package to link MySQL & NODE (??????DO I HAVE TO DO THIS FOR EACH FILE?????)
+var mysql = require('mysql');
 var connection = mysql.createConnection({
-  host     : 'localhost',
-  user     : 'root',
-  password : '#', //put in password, but will hide in .env
-  database : 'bamazon'
+    host: 'localhost',
+    user: 'root',
+    password: '#', //put in password, but will hide in .env
+    database: 'bamazon'
 });
- 
-connection.connect(function(err) {
+
+connection.connect(function (err) {
     if (err) {
-      console.error('error connecting: ' + err.stack);
-      return;
-    }
-   
-    console.log('connected as id ' + connection.threadId);
+        console.error('error connecting: ' + err.stack);
+        return;
+    }    
     afterConnection();
 });
 
-//display all of the items available for sale. Include the ids, names, and prices of products for sale.
-function afterConnection(){
- connection.query("SELECT * FROM products", function (err, results){
-    if (err)throw err;
-    for (var i = 0; i < results.length; i++){
-        console.log ("ID: " + results[i].item_id + "|","Product: " + results[i].product_name + "|", "Price: $" + results[i].price);
-    }
 
-    console.log (results.product_name);//gets product
-    connection.end();
- });
+//display all of the items available for sale. Includes the ids, names, and prices of products for sale.
+function afterConnection() {
+    connection.query("SELECT * FROM products", function (err, results) {
+        if (err) throw err;
+        for (var i = 0; i < results.length; i++) {
+            console.log("ID: " + results[i].item_id + "|", "Product: " + results[i].product_name + "|", "Price: $" + results[i].price);
+            
+        }
+
+        //constructor function to get user inputs
+        //prompt users with two messages.
+        //The first should ask them the ID of the product they would like to buy.
+        //The second message should ask how many units of the product they would like to buy.
+        function Buyer(buy, units) {
+            this.buy = buy;
+            this.units = units;
+        }
+    
+        inquirer.prompt([
+            {
+                name: "buy",
+                message: "What is the ID of the product you would like to purchse?"
+            },
+    
+            {
+                name: "units",
+                message: "How many would you like to purchase?"
+            }
+        ]).then(function (answer) {
+            var newBuyer = new Buyer(
+                answer.buy,
+                answer.units
+            );
+    
+    
+        });
+    });
 
 }
-
-
-//prompt users with two messages.
-
-    //The first should ask them the ID of the product they would like to buy.
-
-
-    //The second message should ask how many units of the product they would like to buy.
-
 
         //Once the customer has placed the order, your application should check if your store has enough of the product to meet the customer's request.
 
