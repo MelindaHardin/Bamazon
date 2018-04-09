@@ -6,7 +6,7 @@ var mysql      = require('mysql');
 var connection = mysql.createConnection({
   host     : 'localhost',
   user     : 'root',
-  password : 'Tricia615', //put in password, but will hide in .env
+  password : '#', //put in password, but will hide in .env
   database : 'bamazon'
 });
 
