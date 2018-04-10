@@ -23,7 +23,7 @@ connection.connect(function (err) {
 function afterConnection() {
     connection.query("SELECT * FROM products", function (err, results) {
         if (err) throw err;
-        console.log(results);
+        
         for (var i = 0; i < results.length; i++) {
             console.log("ID: " + results[i].item_id + "|", "Product: " + results[i].product_name + "|", "Price: $" + results[i].price);
             console.log("\n--------------------------------------\n");
