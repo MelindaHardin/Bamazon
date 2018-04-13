@@ -1,12 +1,12 @@
-//NPM inquirer package for prompts
 var inquirer = require("inquirer");
-
-//NPM MySQL package to link MySQL & NODE (??????DO I HAVE TO DO THIS FOR EACH FILE?????)
 var mysql = require('mysql');
+
+//npm connection information for sql database
+
 var connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '#', //put in password, but will hide in .env
+    password: '#', //hide in .env
     database: 'bamazon'
 });
 
@@ -15,57 +15,86 @@ connection.connect(function (err) {
         console.error('error connecting: ' + err.stack);
         return;
     }
-    afterConnection();
+    displayItems();
 });
 
 
+
+
+
 //display all of the items available for sale. Includes the ids, names, and prices of products for sale.
-function afterConnection() {
+function displayItems() {
     connection.query("SELECT * FROM products", function (err, results) {
         if (err) throw err;
-        
+        //console.log(results);  //show everything in array
+
         for (var i = 0; i < results.length; i++) {
             console.log("ID: " + results[i].item_id + "|", "Product: " + results[i].product_name + "|", "Price: $" + results[i].price);
             console.log("\n--------------------------------------\n");
-
         }
+        userInputs();
+    });
 
-        //constructor function to get user inputs .
-        function Buyer(itemBuying, unitsPurchasing) {
-            this.itemBuying = itemBuying;
-            this.unitsPurchasing = unitsPurchasing;
-            //this.price= <----------HOW TO GET PRICE OF SELECTION????????
-            //this.inStock = __________; //<----------HOW TO GET STOCK OF SELECTION????????
+}
 
+//prompt users with two messages with inquirer npm package
 
-            this.orderFulfilled = function () {
-                var total = this.unitsPurchasing * results.price;
-                console.log("Thank you for your purchase. Your total comes to $" + total + ".");
-            };
-            this.orderNotFulfilled = function () {
-                console.log("Sorry, we only have " + inStock + "currently in stock.  Would you like to ")
-            };
-        };
+function userInputs() {
 
-        //prompt users with two messages
+    connection.query("SELECT * FROM products", function (err, results) {
+        if (err) throw err;
+
         inquirer.prompt([
             {
-                name: "itemBuying",
-                message: "What is the ID of the product you would like to purchse?"
-            },
+                type: 'input',
+                name: 'choice',
+                /*choices: function () {
+                    var choiceArray = [];
+                    for (var j = 0; j < results.length; j++) {
+                        choiceArray.push(results[j].item_id);
+                    }
+                    return choiceArray;
+                },*/
 
+                message: 'Please enter the Item ID which you would like to purchase.'
+
+            },
             {
-                name: "unitsPurchasing",
-                message: "How many would you like to purchase?"
+                type: 'input',
+                name: "itemQuantity",
+                message: "How many would you like to purchase?",
+                validate: function (value) {
+                    if (isNaN(value) === false) {
+                        return true;
+                    }
+                    return false;
+                }
             }
         ]).then(function (answer) {
-            var newBuyer = new Buyer(
-                answer.itemBuying,
-                answer.unitsPurchasing
-            );
-            //IF ELSE statement here for orders info
-            newBuyer.orderFulfilled();
-        });
+                    
+            for (var k = 0; k < results.length; k++) {
+                (results[k].item_id === answer.choice)
+                var chosenItem = results[k];
+            }    
+                
+                if (chosenItem.stock_quantity >= parseInt(answer.itemQuantity)) {
+                    
+                    var updateQuantity = 'UPDATE products SET stock_quantity = ' + (answer.itemQuantity - chosenItem.stock_quantity) + ' WHERE item_id = ' + chosenItem;
 
+
+                    connection.query(updateQuantity, function (error) {
+                        if (error) throw err;
+                        console.log("Thank you for your purchase!");
+
+                    }
+                    );
+                } else {
+                    // bid wasn't high enough, so apologize and start over
+                    console.log("Insufficient quantity.");
+                    userInputs();
+                }
+            
+        });
     });
 }
+

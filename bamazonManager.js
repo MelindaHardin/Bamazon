@@ -88,7 +88,7 @@ function lowInventory() {
     connection.query("SELECT * FROM products", function (err, results) {
         if (err) throw err;
 
-        for (var i = 0; i < results.length; i++) {
+        for (var j = 0; j < results.length; j++) {
             console.log("function here list all items with an inventory count lower than five");
 
         }
