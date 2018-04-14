@@ -41,60 +41,50 @@ function displayItems() {
 
 function userInputs() {
 
-    connection.query("SELECT * FROM products", function (err, results) {
-        if (err) throw err;
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'itemId',
+            message: 'Please enter the Item ID which you would like to purchase.'
 
-        inquirer.prompt([
-            {
-                type: 'input',
-                name: 'choice',
-                /*choices: function () {
-                    var choiceArray = [];
-                    for (var j = 0; j < results.length; j++) {
-                        choiceArray.push(results[j].item_id);
-                    }
-                    return choiceArray;
-                },*/
-
-                message: 'Please enter the Item ID which you would like to purchase.'
-
-            },
-            {
-                type: 'input',
-                name: "itemQuantity",
-                message: "How many would you like to purchase?",
-                validate: function (value) {
-                    if (isNaN(value) === false) {
-                        return true;
-                    }
-                    return false;
+        },
+        {
+            type: 'input',
+            name: "quantity",
+            message: "How many would you like to purchase?",
+            validate: function (value) {
+                if (isNaN(value) === false) {
+                    return true;
                 }
+                return false;
             }
-        ]).then(function (answer) {
-                    
-            for (var k = 0; k < results.length; k++) {
-                (results[k].item_id === answer.choice)
-                var chosenItem = results[k];
-            }    
-                
-                if (chosenItem.stock_quantity >= parseInt(answer.itemQuantity)) {
-                    
-                    var updateQuantity = 'UPDATE products SET stock_quantity = ' + (answer.itemQuantity - chosenItem.stock_quantity) + ' WHERE item_id = ' + chosenItem;
+        }
+    ]).then(function (answer) {
+        var idSelection = answer.itemId;
+        var quantitySelection = answer.quantity;
+        purchase(idSelection, quantitySelection);
 
 
-                    connection.query(updateQuantity, function (error) {
-                        if (error) throw err;
-                        console.log("Thank you for your purchase!");
-
-                    }
-                    );
-                } else {
-                    // bid wasn't high enough, so apologize and start over
-                    console.log("Insufficient quantity.");
-                    userInputs();
-                }
-            
-        });
     });
-}
+
+    function purchase(ID, reqQuantity) {
+
+        connection.query("SELECT * FROM products WHERE item_id = " + ID, function (err, results) {
+            if (err) throw err;
+
+            if (reqQuantity <= results[0].stock_quantity) {
+                
+                var total = results[0].price * reqQuantity;
+                console.log("thank you for your purchase.  Your total comes to $" +total + ".");
+                connection.query("UPDATE products SET stock_quantity = stock_quantity - " + reqQuantity + " WHERE item_id = " + ID);
+            } else {
+                // bid wasn't high enough, so apologize and start over
+                console.log("Insufficient quantity.");
+                userInputs();
+            }
+
+        });
+    }
+
+};
 
