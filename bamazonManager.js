@@ -1,12 +1,12 @@
 //NPM inquirer package for prompts
 var inquirer = require("inquirer");
 
-//NPM MySQL package to link MySQL & NODE (??????DO I HAVE TO DO THIS FOR EACH FILE?????)
+//NPM MySQL package to link MySQL & NODE
 var mysql = require('mysql');
 var connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '#', //put in password, but will hide in .env
+    password: '#',
     database: 'bamazon'
 });
 
@@ -69,7 +69,7 @@ function menuOptions() {
         } else {
             console.log("Please make a selection from the above options.");
 
-        } //DO I NEED THIS LAST ELSE STATEMENT since the NPM has it's own???
+        }
 
     });
 }
@@ -111,12 +111,11 @@ function lowInventory() {
 
 
 function addToInventory(update) {
-
     inquirer.prompt([
         {
             name: "id",
             type: "input",
-            message: "ID number: "
+            message: "ID number of Item to be restocked: "
         },
         {
             name: "number",
@@ -124,12 +123,17 @@ function addToInventory(update) {
             message: "How many to be added: "
         }
     ]).then(function (updateInfo) {
-        var query = connection.query("UPDATE products SET? WHERE?",
-            {
+        var query = connection.query("UPDATE products SET ? WHERE ?",
+            [{
                 stock_quantity: parseInt(updateInfo.number)
             },
+            {
+                item_id: updateInfo.id
+            }],
+
             function (err, results) {
                 console.log("\n" + updateInfo.number + " items have been added\n");
+                console.log("Need help with this function. Ran out of time.")
             }
         );
     })
@@ -141,18 +145,47 @@ function addToInventory(update) {
 
 
 function deleteItem() {
-    console.log("Deleting product function here");
+    inquirer.prompt([
+        {
+            name: "deleteId",
+            type: "input",
+            message: "Please enter ID number of product you would like to delete."
+        }, {
+            name: "confirmDelete",
+            type: "confirm",
+            message: "Are you sure you want to delete this item?"
+        }
 
-};
+    ]).then(function (deleting) {
+        if (deleting.confirmDelete === true) {
+            var query = connection.query("DELETE FROM products WHERE ?",
+                {
+                    item_id: deleting.deleteId
+                },
+
+                function (err, results) {
+
+                    console.log("----------------------------");
+                    console.log("Item deleted.");
+                }
+            );
+            menuOptions();
+        } else {
+            console.log("----------------------------");
+            menuOptions();
+
+        }
+
+    })
+}
+
 
 
 
 
 
 function addNewProduct(input) {
-
     inquirer.prompt([
-
         {
             name: "name",
             type: "input",
