@@ -34,12 +34,14 @@ function menuOptions() {
             choices: ["View Products for Sale", "View Low Inventory", "Update Inventory", "Add New Product"]
         }
     ]).then(function (selection) {
-        if (selection.menu === "View Products for Sale: ") {
+        if (selection.menu === "View Products for Sale") {
             console.log("Products for Sale");
             itemsForSale();
+
         } else if (selection.menu === "View Low Inventory") {
             console.log("Items with inventory count lower than five: ");
             lowInventory();
+
         } else if (selection.menu === "Update Inventory") {
 
             inquirer.prompt([
@@ -53,9 +55,9 @@ function menuOptions() {
 
             ]).then(function (selectionII) {
                 if (selectionII.update === "Add to Inventory") {
-                    updateProduct();
+                    addToInventory();
                 } else {
-                    deletingProduct();
+                    deleteItem();
                 }
 
             });
@@ -63,13 +65,18 @@ function menuOptions() {
 
         } else if (selection.menu === "Add New Product") {
             console.log("New item to add: ");
-            addtoInventory();
+            addNewProduct();
         } else {
             console.log("Please make a selection from the above options.");
-        } //DO I NEED THIS LAST ELSE STATEMENT???
+
+        } //DO I NEED THIS LAST ELSE STATEMENT since the NPM has it's own???
 
     });
 }
+
+
+
+
 
 
 function itemsForSale() {
@@ -84,44 +91,104 @@ function itemsForSale() {
     });
 }
 
+
+
+
+
 function lowInventory() {
-    connection.query("SELECT * FROM products", function (err, results) {
+    connection.query("SELECT * FROM products WHERE stock_quantity < 5", function (err, results) {
         if (err) throw err;
 
         for (var j = 0; j < results.length; j++) {
-            console.log("function here list all items with an inventory count lower than five");
+            console.log("Item ID " + results[j].item_id + "|" + "Item: " + results[j].product_name + "|" + "Total in stock: " + results[j].stock_quantity);
 
         }
     });
 }
 
-function addtoInventory() {
-    connection.query("INSERT INTO products SET?",
+
+
+
+
+function addToInventory(update) {
+
+    inquirer.prompt([
         {
-            product_name: "THIS SOMETHING HERE",
-            department_name: "THIS DEPARTMENT HERE",
-            price: "THIS PRICE HERE",
-            stock_quantity: "THIS STOCK QUANTITY HERE"
+            name: "id",
+            type: "input",
+            message: "ID number: "
         },
-        function (err, results) {
-            console.log(results.affectedRows + "producted added!/n");
-            updateProduct();
+        {
+            name: "number",
+            type: "input",
+            message: "How many to be added: "
         }
-    );
-    console.log(query.sql);
-}
-
-
-function updateProduct() {
-        console.log("Update product function here");
-   
-        
+    ]).then(function (updateInfo) {
+        var query = connection.query("UPDATE products SET? WHERE?",
+            {
+                stock_quantity: parseInt(updateInfo.number)
+            },
+            function (err, results) {
+                console.log("\n" + updateInfo.number + " items have been added\n");
+            }
+        );
+    })
 };
 
 
-function deletingProduct() {
+
+
+
+
+function deleteItem() {
     console.log("Deleting product function here");
-    
+
 };
 
+
+
+
+
+function addNewProduct(input) {
+
+    inquirer.prompt([
+
+        {
+            name: "name",
+            type: "input",
+            message: "Name of product: "
+        },
+        {
+            name: "dept",
+            type: "input",
+            message: "Department: "
+        },
+        {
+            name: "price",
+            type: "input",
+            message: "Sale Price: "
+        },
+        {
+            name: "quantity",
+            type: "input",
+            message: "Available quantity: "
+        }
+
+    ]).then(function (AddInfo) {
+        var query = connection.query("INSERT INTO products SET?",
+            {
+                product_name: AddInfo.name,
+                department_name: AddInfo.dept,
+                price: parseFloat(AddInfo.price),
+                stock_quantity: parseInt(AddInfo.quantity)
+
+            },
+            function (err, results) {
+                console.log("\n" + AddInfo.quantity + " " + AddInfo.name + " have been added to the inventory!\n");
+
+            });
+
+    })
+
+}
 
